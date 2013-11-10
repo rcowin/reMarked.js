@@ -2,7 +2,10 @@ reMarked.js
 -----------
 client-side DOM > markdown _(MIT Licensed)_
 
-*Started for to attain better compatibility as inverted marked to be used with hallo.js*
+*Started for to attain better compatibility as inverted marked to be used with hallo.js. Improvements include*
+* *better code support*
+* *headless tables*
+
 
 ---
 A project similar to [Markdownify](http://milianw.de/projects/markdownify/) but executed on the client. The ultimate goal is integration with existing WYSIWYG html editors (eg: TinyMCE, CKeditor, Loki, CLeditor) to produce Markdown output. There are currently no WYSIWYG editors for markdown, only WYSIWYM, which still require knowledge of markdown syntax and its many quirky flavors.
