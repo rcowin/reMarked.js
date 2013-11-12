@@ -552,9 +552,6 @@ reMarked = function(opts) {
       tagr: true,
       wrapK: "\n",
       lnInd: 0,
-      rend: function(){
-          return wrap.call(this, (this.tagr ? otag(this.tag, this.e) : "") + wrap.call(this, this.rendK(), this.wrapK) + (this.tagr ? ctag(this.tag) : ""), this.wrap);
-       },
     });
 
     // can morph into inline based on context
