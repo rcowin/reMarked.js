@@ -232,7 +232,7 @@ reMarked = function(opts) {
         }
 
         var codeStr = "",
-            wrapInCode = true;
+            wrapInCode = false;
         for (i in this.e.childNodes) {
           if (!/\d+/.test(i)) continue;
 
@@ -241,6 +241,7 @@ reMarked = function(opts) {
 
           // ignored tags
           if (name == "code"){
+            wrapInCode = true;
             codeStr += n.innerHTML;
             continue;
           }
@@ -275,14 +276,16 @@ reMarked = function(opts) {
           // empty whitespace handling
           if (name == "txt" && /^\s+$/.test(n.textContent)) {
             // ignore if first or last child (trim)
-            if (i == 0 || i == this.e.childNodes.length - 1)
-              continue;
+            if (this.e.childNodes.length > 1){
+              if (i == 0 || i == this.e.childNodes.length - 1)
+                continue;
 
-            // only ouput when has an adjacent inline elem
-            var prev = this.e.childNodes[i-1],
-              next = this.e.childNodes[i+1];
-            if (prev && !nodeName(prev).match(inlRe) || next && !nodeName(next).match(inlRe))
-              continue;
+              // only ouput when has an adjacent inline elem
+              var prev = this.e.childNodes[i-1],
+                next = this.e.childNodes[i+1];
+              if (prev && !nodeName(prev).match(inlRe) || next && !nodeName(next).match(inlRe))
+                continue;
+            }
           }
 
           var wrap = null;
@@ -373,7 +376,10 @@ reMarked = function(opts) {
         return "\n\n";
     },
     rend: function(){
-      return wrap.call(this, (this.tagr ? otag(this.tag, this.e) : "") + wrap.call(this, pfxLines(pfxLines(this.rendK(), this.lnPfx), rep(" ", this.lnInd)), this.wrapK) + (this.tagr ? ctag(this.tag) : ""), this.wrap);
+      if (this instanceof lib.pre || this.p instanceof lib.pre)//fix this to be any child
+        return wrap.call(this, (this.tagr ? otag(this.tag, this.e) : "") + wrap.call(this, pfxLines(this.rendK(), rep(" ", this.lnInd)), this.wrapK) + (this.tagr ? ctag(this.tag) : ""), this.wrap);
+      else
+        return wrap.call(this, (this.tagr ? otag(this.tag, this.e) : "") + wrap.call(this, pfxLines(pfxLines(this.rendK(), this.lnPfx), rep(" ", this.lnInd)), this.wrapK) + (this.tagr ? ctag(this.tag) : ""), this.wrap);
     },
 
     rendK: function(){
@@ -399,6 +405,7 @@ reMarked = function(opts) {
   lib.ctblk = lib.cblk.extend({tagr: true});
 
   lib.inl = lib.tag.extend({
+    // wrap: ["",""],
     rend: function(){
       return wrap.call(this, this.rendK(), this.wrap);
     }
@@ -414,7 +421,11 @@ reMarked = function(opts) {
 
     lib.p = lib.blk.extend({
       rendK: function() {
-        return this.supr().replace(/^\s+/gm, "");
+        var res = this.supr();
+        if (this.p instanceof lib.pre)
+          return res;
+        else
+          return this.supr().replace(/^\s+/gm, "");
       }
     });
 
@@ -523,7 +534,7 @@ reMarked = function(opts) {
       wrap: ["", function() {
         var end = cfg.br_only ? "<br>" : "  ";
         // br in headers output as html
-        return this.p instanceof lib.h ? "<br>" : end + "\n";
+        return this.p instanceof lib.h ? "<br>" : end + "\n ";
       }]
     });
 
@@ -540,7 +551,10 @@ reMarked = function(opts) {
     lib.pre = lib.blk.extend({
       tagr: true,
       wrapK: "\n",
-      lnInd: 0
+      lnInd: 0,
+      rend: function(){
+          return wrap.call(this, (this.tagr ? otag(this.tag, this.e) : "") + wrap.call(this, this.rendK(), this.wrapK) + (this.tagr ? ctag(this.tag) : ""), this.wrap);
+       },
     });
 
     // can morph into inline based on context
